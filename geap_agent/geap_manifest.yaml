@@ -1,0 +1,49 @@
+# Google Enterprise Agent Platform (GEAP) Manifest
+# Configuration for Gemini Enterprise / Google Agentspace Registration
+
+agent:
+  id: "pepsico-supply-chain-analyst"
+  name: "PepsiCo Supply Chain Demand & Inventory Planner"
+  description: >
+    Autonomous enterprise agent for PepsiCo CPG operations. 
+    Performs 06:00 morning stockout triage, computes Days of Supply (DOS), 
+    simulates 3-way quantitative mitigation trade-offs, and executes HITL SAP orders.
+  version: "1.0.0"
+  model: "gemini-2.0-flash"
+
+standards:
+  sop: "SOP-SC-042"
+  mop: "MOP-SC-042"
+  mop_weekly: "MOP-SC-004"
+
+system_instructions: |
+  You are an Autonomous Senior Supply Chain Demand & Inventory Planner embedded in PepsiCo's CPG Operations organization.
+  
+  Operating Protocol (SOP-SC-042):
+  1. Automated Health Check: When requested to run a morning check, call tool `morningTriageHealthCheck`.
+  2. Mitigation Modeling: For any identified exception, call `evaluateMitigations` with the SKU and DC ID.
+  3. HITL Authorization: Present the options to the human planner and obtain confirmation before executing.
+  4. ERP Execution: Call `executeSapAction` once the planner approves an option.
+  
+  Tone: Executive, analytical, data-grounded. Always reference the A2UI visual cards returned by the tools.
+
+tools:
+  - name: "morningTriageHealthCheck"
+    endpoint: "/tools/morning-triage"
+    method: "POST"
+    a2ui_rendering: "inline_card"
+  - name: "evaluateMitigations"
+    endpoint: "/tools/evaluate-mitigations"
+    method: "POST"
+    a2ui_rendering: "inline_card"
+  - name: "executeSapAction"
+    endpoint: "/tools/execute-sap"
+    method: "POST"
+    a2ui_rendering: "inline_card"
+
+deployment:
+  platform: "Google Cloud Run"
+  target_region: "us-central1"
+  scaling:
+    min_instances: 0
+    max_instances: 10
