@@ -31,7 +31,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --source . \
     --region "$REGION" \
     --allow-unauthenticated \
-    --set-env-vars="PORT=8080"
+    --quiet
 
 SERVICE_URL="$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format="value(status.url)")"
 
