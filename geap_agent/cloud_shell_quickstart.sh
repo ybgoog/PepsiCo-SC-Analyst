@@ -16,14 +16,11 @@ echo "==========================================================================
 
 gcloud config set project "$PROJECT_ID"
 
-# 1. Clone repository if not present
-if [ ! -d "PepsiCo-SC-Analyst" ]; then
-  git clone https://github.com/ybgoog/PepsiCo-SC-Analyst.git
-  cd PepsiCo-SC-Analyst
-else
-  cd PepsiCo-SC-Analyst
-  git pull origin main
-fi
+# 1. Clean clone repository
+echo "Fetching latest agent codebase..."
+rm -rf PepsiCo-SC-Analyst
+git clone https://github.com/ybgoog/PepsiCo-SC-Analyst.git
+cd PepsiCo-SC-Analyst
 
 # 2. Deploy to Cloud Run
 echo "Deploying Cloud Run microservice..."
