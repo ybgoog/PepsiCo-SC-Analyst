@@ -7,7 +7,7 @@ info:
     Includes rich A2UI visual card payload definitions.
   version: 1.0.0
 servers:
-  - url: https://pepsico-sc-agent-uc.a.run.app
+  - url: https://pepsico-sc-agent-33758765031.us-central1.run.app
     description: Google Cloud Run GEAP Production Endpoint
   - url: http://localhost:8090
     description: Local GEAP Development & Testing Endpoint
