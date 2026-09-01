@@ -25,8 +25,8 @@ gcloud services enable \
     containerregistry.googleapis.com \
     --quiet 2>/dev/null || true
 
-# ── Step 2: Fix bucket-level permissions ──
-echo "[2/6] Granting storage permissions..."
+# ── Step 2: Fix service account permissions ──
+echo "[2/6] Granting required permissions to Compute Engine service account..."
 PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
 SA_COMPUTE="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
 BUCKET="run-sources-${PROJECT_ID}-${REGION}"
@@ -35,10 +35,20 @@ BUCKET="run-sources-${PROJECT_ID}-${REGION}"
 gsutil iam ch "serviceAccount:${SA_COMPUTE}:objectViewer" "gs://${BUCKET}" 2>/dev/null || true
 gsutil iam ch "serviceAccount:${SA_COMPUTE}:objectAdmin" "gs://${BUCKET}" 2>/dev/null || true
 
-# Also grant project-level as fallback
+# Storage admin (project-level fallback)
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:${SA_COMPUTE}" \
     --role="roles/storage.admin" --quiet --condition=None 2>/dev/null || true
+
+# Artifact Registry writer (needed to push container images to gcr.io)
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:${SA_COMPUTE}" \
+    --role="roles/artifactregistry.writer" --quiet --condition=None 2>/dev/null || true
+
+# Cloud Build logs writer
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:${SA_COMPUTE}" \
+    --role="roles/logging.logWriter" --quiet --condition=None 2>/dev/null || true
 
 echo "    Waiting 15s for IAM propagation..."
 sleep 15
