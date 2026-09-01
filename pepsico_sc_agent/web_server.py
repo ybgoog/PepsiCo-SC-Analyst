@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import argparse
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -133,50 +134,54 @@ class SupplyChainDashboardHandler(BaseHTTPRequestHandler):
             self.wfile.write(csv_content.encode("utf-8"))
 
         elif parsed_path.path == "/api/draft-email":
-            agent = SupplyChainPlannerAgent()
-            alerts = agent.run_morning_health_check()
-            matrices = agent.evaluate_all_exceptions(alerts)
-            
-            critical_count = sum(1 for a in alerts if a.severity == SeverityLevel.CRITICAL)
-            total_rev = sum(a.daily_revenue_at_risk for a in alerts)
-            total_cases = sum(a.units_needed_for_target_dos for a in alerts)
-            
-            date_str = datetime.now().strftime("%Y-%m-%d")
-            
-            email_body = []
-            email_body.append(f"Team,")
-            email_body.append(f"Here is the automated morning exception brief following our 06:00 health check (SOP-SC-042 / MOP-SC-004).\n")
-            email_body.append(f"### 📊 Morning Risk Snapshot ({date_str})")
-            email_body.append(f"• Active Portfolio Exceptions: {len(alerts)} SKUs ({critical_count} Critical)")
-            email_body.append(f"• Cumulative Daily Revenue Exposure: ${total_rev:,.2f} / day")
-            email_body.append(f"• Total Rebalance Volume Needed: {total_cases:,} Cases")
-            email_body.append(f"• Protected Key Account Fill Rate: 99.2% (Tier-1 OTIF Protected)\n")
-            
-            email_body.append(f"### 🚨 Top Priority Stockout Risks & Modeled Actions:")
-            for idx, a in enumerate(alerts[:3], 1):
-                m = next((mat for mat in matrices if mat.sku_id == a.sku_id and mat.dc_id == a.dc_id), None)
-                rec = next((o for o in m.options if o.option_id == m.recommended_option_id), m.options[0]) if m else None
-                email_body.append(
-                    f"{idx}. {a.sku_name} ({a.sku_id}) at {a.dc_name}:\n"
-                    f"   - Current Stock: {a.current_on_hand:,} cases ({a.current_dos:.1f} DOS vs {a.safety_stock_dos_threshold:.1f}d target)\n"
-                    f"   - Revenue at Risk: ${a.daily_revenue_at_risk:,.2f}/day (Root cause: {a.root_cause_narrative})\n"
-                    f"   - Proposed Action: {rec.title if rec else 'Option A'} (Cost: ${rec.execution_cost_usd:,.2f}, Lead Time: {rec.recovery_lead_time_hours} hrs, Restores to 7.0 DOS)"
-                )
-            
-            email_body.append(f"\n### 📋 Recommended Next Steps:")
-            email_body.append(f"1. Authorize recommended STO transfers in the Operations Dashboard (http://localhost:8080).")
-            email_body.append(f"2. Logistics team to confirm dedicated team-driver capacity for Dallas -> Atlanta & Dallas -> Chicago corridors.")
-            email_body.append(f"3. All confirmed purchase orders will post back to SAP automatically.\n")
-            email_body.append(f"Best regards,\nSenior Supply Chain Demand & Inventory Planner\nPepsiCo Operations & Logistics")
-            
-            payload = {
-                "to": "sc-planning-manager@pepsico.com",
-                "cc": "ops-lead@pepsico.com, logistics-director@pepsico.com",
-                "subject": f"[ACTION REQUIRED] Daily Supply Chain Exception Brief & STO Rebalance Approvals - {date_str}",
-                "body": "\n".join(email_body)
-            }
-            self._set_headers(200)
-            self.wfile.write(json.dumps(payload).encode("utf-8"))
+            try:
+                agent = SupplyChainPlannerAgent()
+                alerts = agent.run_morning_health_check()
+                matrices = agent.evaluate_all_exceptions(alerts)
+                
+                critical_count = sum(1 for a in alerts if a.severity == SeverityLevel.CRITICAL)
+                total_rev = sum(a.daily_revenue_at_risk for a in alerts)
+                total_cases = sum(a.units_needed_for_target_dos for a in alerts)
+                
+                date_str = datetime.now().strftime("%Y-%m-%d")
+                
+                email_body = []
+                email_body.append("Team,")
+                email_body.append(f"Here is the automated morning exception brief following our 06:00 health check (SOP-SC-042 / MOP-SC-004).\n")
+                email_body.append(f"### 📊 Morning Risk Snapshot ({date_str})")
+                email_body.append(f"• Active Portfolio Exceptions: {len(alerts)} SKUs ({critical_count} Critical)")
+                email_body.append(f"• Cumulative Daily Revenue Exposure: ${total_rev:,.2f} / day")
+                email_body.append(f"• Total Rebalance Volume Needed: {total_cases:,} Cases")
+                email_body.append(f"• Protected Key Account Fill Rate: 99.2% (Tier-1 OTIF Protected)\n")
+                
+                email_body.append("### 🚨 Top Priority Stockout Risks & Modeled Actions:")
+                for idx, a in enumerate(alerts[:3], 1):
+                    m = next((mat for mat in matrices if mat.sku_id == a.sku_id and mat.dc_id == a.dc_id), None)
+                    rec = next((o for o in m.options if o.option_id == m.recommended_option_id), m.options[0]) if m else None
+                    email_body.append(
+                        f"{idx}. {a.sku_name} ({a.sku_id}) at {a.dc_name}:\n"
+                        f"   - Current Stock: {a.current_on_hand:,} cases ({a.current_dos:.1f} DOS vs {a.safety_stock_dos_threshold:.1f}d target)\n"
+                        f"   - Revenue at Risk: ${a.daily_revenue_at_risk:,.2f}/day (Root cause: {a.root_cause_narrative})\n"
+                        f"   - Proposed Action: {rec.title if rec else 'Option A'} (Cost: ${rec.execution_cost_usd:,.2f}, Lead Time: {rec.recovery_lead_time_hours} hrs, Restores to 7.0 DOS)"
+                    )
+                
+                email_body.append("\n### 📋 Recommended Next Steps:")
+                email_body.append("1. Authorize recommended STO transfers in the Operations Dashboard (http://localhost:8080).")
+                email_body.append("2. Logistics team to confirm dedicated team-driver capacity for Dallas -> Atlanta & Dallas -> Chicago corridors.")
+                email_body.append("3. All confirmed purchase orders will post back to SAP automatically.\n")
+                email_body.append("Best regards,\nSenior Supply Chain Demand & Inventory Planner\nPepsiCo Operations & Logistics")
+                
+                payload = {
+                    "to": "sc-planning-manager@pepsico.com",
+                    "cc": "ops-lead@pepsico.com, logistics-director@pepsico.com",
+                    "subject": f"[ACTION REQUIRED] Daily Supply Chain Exception Brief & STO Rebalance Approvals - {date_str}",
+                    "body": "\n".join(email_body)
+                }
+                self._set_headers(200)
+                self.wfile.write(json.dumps(payload).encode("utf-8"))
+            except Exception as e:
+                self._set_headers(500)
+                self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
 
         elif parsed_path.path == "/api/audit":
             logs = get_recent_sap_audit_trail(limit=50)
