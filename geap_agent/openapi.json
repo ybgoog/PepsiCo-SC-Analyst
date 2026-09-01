@@ -1,0 +1,184 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PepsiCo Autonomous Supply Chain Agent (GEAP Tools)",
+    "description": "Official Google Enterprise Agent Platform (GEAP) tool specifications for the PepsiCo Senior Supply Chain Demand & Inventory Planner Agent adhering to SOP-SC-042 and MOP-SC-042. Includes rich A2UI visual card payload definitions.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://pepsico-sc-agent-gmi-ccai-insights-uc.a.run.app",
+      "description": "Google Cloud Run GEAP Production Endpoint (gmi-ccai-insights)"
+    },
+    {
+      "url": "http://localhost:8090",
+      "description": "Local GEAP Development & Testing Endpoint"
+    }
+  ],
+  "paths": {
+    "/tools/morning-triage": {
+      "post": {
+        "summary": "06:00 Automated Morning Health Check",
+        "description": "Performs automated morning triage across regional distribution centers (Dallas, Chicago, Atlanta, Northeast) querying SAP ERP tables (MARC, MARD, VBBE). Calculates Days of Supply (DOS) and ranks exceptions by SLA-weighted revenue risk. Returns machine-readable JSON plus A2UI.TriageScorecard visual HTML card.",
+        "operationId": "morningTriageHealthCheck",
+        "responses": {
+          "200": {
+            "description": "Successful morning triage report with A2UI visual card.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tool_name": { "type": "string" },
+                    "status": { "type": "string" },
+                    "summary": { "type": "string" },
+                    "executive_commentary": { "type": "string" },
+                    "kpis": { "type": "object" },
+                    "alerts": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    },
+                    "a2ui_card_html": {
+                      "type": "string",
+                      "description": "Styled A2UI visual HTML scorecard rendered inside Gemini Enterprise chat."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/evaluate-mitigations": {
+      "post": {
+        "summary": "3-Way Quantitative Mitigation Simulation",
+        "description": "Simulates 3 distinct quantitative mitigation options (Option A: Inter-DC STO, Option B: Safety Stock Rebalance, Option C: Order Deferral/Throttling) with exact linehaul freight costs, transit lead times, and confidence scores. Returns machine-readable comparison matrix plus A2UI.MitigationMatrix visual card.",
+        "operationId": "evaluateMitigations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sku_id", "dc_id"],
+                "properties": {
+                  "sku_id": {
+                    "type": "string",
+                    "example": "SKU-FL-101",
+                    "description": "Target SKU/Material ID"
+                  },
+                  "dc_id": {
+                    "type": "string",
+                    "example": "DC-ATL-03",
+                    "description": "Target Plant / DC Location"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quantitative mitigation simulation matrix with A2UI card.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tool_name": { "type": "string" },
+                    "status": { "type": "string" },
+                    "sku_id": { "type": "string" },
+                    "dc_id": { "type": "string" },
+                    "recommended_option_id": { "type": "string" },
+                    "recommendation_rationale": { "type": "string" },
+                    "options": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    },
+                    "a2ui_card_html": {
+                      "type": "string",
+                      "description": "Styled A2UI visual 3-way mitigation matrix card."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/execute-sap": {
+      "post": {
+        "summary": "Human-in-the-Loop SAP ERP Execution",
+        "description": "Posts the planner's authorized mitigation decision back into the enterprise SAP ERP / IBP semantic layer. Generates confirmed STO purchase orders (#4500xxxxxx), updates unrestricted stock balances, and logs audit record. Returns machine-readable confirmation plus A2UI.SAPConfirmationToast badge.",
+        "operationId": "executeSapAction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sku_id", "dc_id", "option_id"],
+                "properties": {
+                  "sku_id": {
+                    "type": "string",
+                    "example": "SKU-FL-101"
+                  },
+                  "dc_id": {
+                    "type": "string",
+                    "example": "DC-ATL-03"
+                  },
+                  "option_id": {
+                    "type": "string",
+                    "example": "OPT-A-STO"
+                  },
+                  "planner_note": {
+                    "type": "string",
+                    "default": "Authorized via Gemini Enterprise HITL Session"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Confirmed SAP transaction document and A2UI badge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tool_name": { "type": "string" },
+                    "status": { "type": "string" },
+                    "sap_document_number": { "type": "string" },
+                    "transaction_code": { "type": "string" },
+                    "quantity_cases": { "type": "integer" },
+                    "audit_message": { "type": "string" },
+                    "a2ui_card_html": {
+                      "type": "string",
+                      "description": "Styled A2UI visual SAP confirmation badge."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Liveness Probe",
+        "description": "Returns health status of the GEAP agent service.",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Service is healthy."
+          }
+        }
+      }
+    }
+  }
+}
