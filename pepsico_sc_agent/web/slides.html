@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PepsiCo Supply Chain Agent | User Guide & Slide Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pepsi-navy: #001738;
+            --pepsi-blue: #005cb9;
+            --pepsi-cyan: #00a3e0;
+            --pepsi-red: #e32219;
+            --pepsi-gold: #f4b223;
+            --pepsi-emerald: #00875a;
+            --bg-dark: #070c18;
+            --bg-slide: #0d1527;
+            --card-bg: #131f38;
+            --border-color: #1f3154;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation / Controls Bar */
+        .top-bar {
+            background: rgba(13, 21, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pepsi-orb {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pepsi-blue) 45%, #ffffff 45%, #ffffff 55%, var(--pepsi-red) 55%);
+            box-shadow: 0 0 12px rgba(0, 92, 185, 0.6);
+        }
+
+        .slide-title-header {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-ctrl {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ctrl:hover {
+            background: var(--pepsi-blue);
+            border-color: var(--pepsi-blue);
+        }
+
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--pepsi-cyan);
+            padding: 0 8px;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: #111d33;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pepsi-blue), var(--pepsi-cyan));
+            width: 10%;
+            transition: width 0.3s ease;
+        }
+
+        /* Presentation Stage */
+        .stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .slide-deck {
+            width: 100%;
+            max-width: 1150px;
+            aspect-ratio: 16 / 9;
+            background: var(--bg-slide);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 92, 185, 0.15);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 48px 56px;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Slide Content Components */
+        .slide-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--pepsi-cyan);
+            margin-bottom: 8px;
+        }
+
+        .slide-heading {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--pepsi-cyan);
+        }
+
+        .card-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .pill-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pill-blue { background: rgba(0, 163, 224, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .pill-gold { background: rgba(244, 178, 35, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .pill-red { background: rgba(227, 34, 25, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .pill-green { background: rgba(0, 135, 90, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        /* Slide Footer */
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Timeline Flow */
+        .timeline-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            position: relative;
+        }
+
+        .timeline-step {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--pepsi-blue);
+            border-radius: 10px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .timeline-step.active-step {
+            border-top-color: var(--pepsi-cyan);
+            box-shadow: 0 0 15px rgba(0, 163, 224, 0.2);
+        }
+
+        .timeline-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--pepsi-cyan);
+            margin-bottom: 6px;
+        }
+
+        /* Metric Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 92, 185, 0.2), rgba(0, 163, 224, 0.05));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .metric-big {
+            font-size: 36px;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .code-snippet {
+            background: #080d1a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #38bdf8;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-bar">
+        <div class="brand-badge">
+            <div class="pepsi-orb"></div>
+            <div>
+                <div class="slide-title-header">PepsiCo Supply Chain Agent — User Guide & Slide Deck</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-ctrl" onclick="prevSlide()">◀ Previous</button>
+            <span class="slide-counter" id="slide-num">1 / 10</span>
+            <button class="btn-ctrl" onclick="nextSlide()">Next ▶</button>
+            <a href="/" class="btn-ctrl" style="text-decoration:none; background:var(--pepsi-blue);">🚀 Open Live Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Main Presentation Stage -->
+    <div class="stage">
+        <div class="slide-deck">
+
+            <!-- ========================================== -->
+            <!-- SLIDE 1: Title Slide -->
+            <!-- ========================================== -->
+            <div class="slide active" id="slide-1">
+                <div style="text-align: center; margin: auto;">
+                    <div style="display:inline-block; margin-bottom:16px;">
+                        <span class="pill-badge pill-blue" style="font-size:13px; padding:4px 12px;">SOP-SC-042</span>
+                        <span class="pill-badge pill-gold" style="font-size:13px; padding:4px 12px; margin-left:8px;">MOP-SC-042</span>
+                    </div>
+                    <h1 style="font-size: 44px; font-weight: 900; letter-spacing: -0.03em; color:#ffffff; margin-bottom: 16px;">
+                        Autonomous Supply Chain<br><span style="background:linear-gradient(90deg, #38bdf8, #ffffff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Exception Triage & Replenishment Agent</span>
+                    </h1>
+                    <p style="font-size: 18px; color: var(--text-muted); max-width: 720px; margin: 0 auto 32px auto; line-height: 1.6;">
+                        An enterprise AI assistant built for PepsiCo CPG Operations & Logistics, empowering Senior Demand & Inventory Planners with daily automated health checks, multi-factor risk ranking, and quantitative mitigation modeling.
+                    </p>
+                    <div style="display:flex; justify-content:center; gap:16px;">
+                        <span class="pill-badge pill-blue">Google ADK Architecture</span>
+                        <span class="pill-badge pill-green">SAP ERP / BigQuery Layer</span>
+                        <span class="pill-badge pill-gold">Human-in-the-Loop (HITL)</span>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Role: Senior Supply Chain Demand & Inventory Planner</span>
+                    <span>PepsiCo Global Operations • 2026</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 2: The Business Challenge -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-2">
+                <div>
+                    <div class="slide-eyebrow">Operational Context</div>
+                    <h2 class="slide-heading">The CPG Volatility & Inventory Challenge</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-3">
+                        <div class="feature-card">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">Unannounced Demand Surges</div>
+                            <div class="card-desc">
+                                Overnight circular features and unannounced retailer promotional lift (e.g., +60% volume spikes) instantly deplete DC safety stocks before standard production runs arrive.
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">🛑</div>
+                            <div class="card-title">Costly Retail OTIF Penalties</div>
+                            <div class="card-desc">
+                                Strategic Key Accounts (Walmart, Target, Kroger) enforce strict On-Time In-Full (OTIF) compliance with invoice penalties (3%) and loss of premium shelf placement.
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">⏳</div>
+                            <div class="card-title">Slow Manual Decision Cycles</div>
+                            <div class="card-desc">
+                                Planners previously spent 2–3 hours manually cross-referencing SAP MARC, MARD, and VBBE tables across multiple regional DCs to calculate freight feasibility.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Problem Statement: Protecting \$170k+/day wholesale revenue from morning stockout risk</span>
+                    <span>Slide 2 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 3: The Agentic Operating Model -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-3">
+                <div>
+                    <div class="slide-eyebrow">Architecture & Philosophy</div>
+                    <h2 class="slide-heading">The Agentic Operating Model: AI + HITL</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2">
+                        <div class="feature-card" style="border-left: 4px solid var(--pepsi-blue);">
+                            <div class="card-title" style="font-size:16px;">🤖 What the Autonomous Agent Does</div>
+                            <ul style="font-size:13px; color:var(--text-muted); line-height:1.8; margin-left:18px; margin-top:8px;">
+                                <li>Executes 06:00 scheduled cron query across BigQuery/SAP views.</li>
+                                <li>Computes active Days of Supply ($\text{DOS}$) across all SKUs.</li>
+                                <li>Prioritizes critical exceptions by Revenue at Risk $\times$ Customer SLA.</li>
+                                <li>Simulates 3 quantitative mitigation paths with freight & lead time models.</li>
+                                <li>Drafts SAP Stock Transfer Orders (`STO-UB-01`).</li>
+                            </ul>
+                        </div>
+                        <div class="feature-card" style="border-left: 4px solid var(--pepsi-emerald);">
+                            <div class="card-title" style="font-size:16px;">👤 What the Senior Planner Does (HITL)</div>
+                            <ul style="font-size:13px; color:var(--text-muted); line-height:1.8; margin-left:18px; margin-top:8px;">
+                                <li>Reviews the 06:30 Daily Exception & Action Brief.</li>
+                                <li>Applies commercial judgment to unannounced sales promotions.</li>
+                                <li>Evaluates modeled trade-offs (expedited freight vs fill-rate risk).</li>
+                                <li>Authorizes execution commands via 1-click HITL approval.</li>
+                                <li>Validates confirmed SAP document numbers (`4500xxxxxx`).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Principles: Transparent trade-offs, zero black-box actions, automated auditability</span>
+                    <span>Slide 3 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 4: SOP-SC-042 Daily Workflow Timeline -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-4">
+                <div>
+                    <div class="slide-eyebrow">Standard Operating Procedure</div>
+                    <h2 class="slide-heading">SOP-SC-042 Daily Operational Schedule</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="timeline-container">
+                        <div class="timeline-step">
+                            <div class="timeline-time">06:00 - 06:30</div>
+                            <div class="card-title" style="font-size:14px;">Step 1: Automated Health Check</div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Agent queries MARC (plant master), MARD (inventory), and VBBE (sales orders) to calculate baseline inventory.
+                            </p>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="timeline-time">06:30 - 07:00</div>
+                            <div class="card-title" style="font-size:14px;">Step 2: Exception Review & Ranking</div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Flags SKUs where $\text{DOS} < 7.0$ days. Ranks by Daily Revenue at Risk $\times$ Tier-1 Key Account weight.
+                            </p>
+                        </div>
+                        <div class="timeline-step active-step">
+                            <div class="timeline-time">07:00 - 07:30</div>
+                            <div class="card-title" style="font-size:14px;">Step 3: Mitigation Simulation</div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Quantitative modeling of Options A, B, and C with freight costs, recovery hours, and confidence scores.
+                            </p>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="timeline-time">07:30 - 08:00</div>
+                            <div class="card-title" style="font-size:14px;">Step 4: HITL SAP Execution</div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Planner authorizes selections. Agent dispatches live STO documents and logs the ERP audit trail.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Workflow Standard: Complete resolution before standard DC 08:00 shift handoff</span>
+                    <span>Slide 4 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 5: Mathematical & Algorithmic Engine -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-5">
+                <div>
+                    <div class="slide-eyebrow">Technical Architecture (MOP-SC-042)</div>
+                    <h2 class="slide-heading">Algorithmic Formulas & Logic</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2">
+                        <div class="feature-card">
+                            <div class="card-title" style="color:var(--pepsi-cyan);">1. Days of Supply ($\text{DOS}$)</div>
+                            <div class="code-snippet">
+                                DOS = Current On-Hand Inventory / Daily Sales Run Rate
+                            </div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Evaluated against the <strong>7.0-day Safety Stock Threshold</strong>. Any SKU under 3.0 days is escalated to Critical.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-title" style="color:#fbbf24;">2. SLA-Weighted Revenue Risk Index</div>
+                            <div class="code-snippet">
+                                Risk = Deficit × (∑ Share_i × Weight_i) × (Rev / 1000)
+                            </div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                <strong>Tier 1 (Walmart, Target):</strong> 2.5× weight + OTIF chargeback risk.<br>
+                                <strong>Tier 2 (Regional Grocery):</strong> 1.5× weight | <strong>Tier 3:</strong> 1.0×
+                            </p>
+                        </div>
+                        <div class="feature-card" style="grid-column: span 2;">
+                            <div class="card-title" style="color:#34d399;">3. Expedited Freight Linehaul Model</div>
+                            <div class="code-snippet">
+                                Linehaul Cost = (Highway Miles × $4.20/mile × FTLs) + (Pallets × $15.00 Handling)
+                            </div>
+                            <p class="card-desc" style="font-size:12px; margin-top:6px;">
+                                Uses team-driver expedited transit speeds (48 mph effective DOT) to compute exact recovery lead times in hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>MOP-SC-042: Grounded in real freight distance matrix and SAP table structures</span>
+                    <span>Slide 5 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 6: Perception & Triage in Action -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-6">
+                <div>
+                    <div class="slide-eyebrow">Triage Demonstration</div>
+                    <h2 class="slide-heading">Morning Exception Triage Results (06:30)</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-4" style="margin-bottom:16px;">
+                        <div class="highlight-box">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:700;">TOTAL EXCEPTIONS</div>
+                            <div class="metric-big" style="color:#f87171;">5 SKUs</div>
+                            <div style="font-size:11px; color:#fca5a5;">5 Critical Breaches</div>
+                        </div>
+                        <div class="highlight-box">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:700;">REVENUE EXPOSURE</div>
+                            <div class="metric-big" style="color:#fbbf24;">$174.4k</div>
+                            <div style="font-size:11px; color:#fde68a;">Daily Wholesale Risk</div>
+                        </div>
+                        <div class="highlight-box">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:700;">REBALANCE UNITS</div>
+                            <div class="metric-big" style="color:#38bdf8;">25,272</div>
+                            <div style="font-size:11px; color:#bae6fd;">Cases to Restore Buffer</div>
+                        </div>
+                        <div class="highlight-box">
+                            <div style="font-size:11px; color:var(--text-muted); font-weight:700;">DONOR SURPLUS</div>
+                            <div class="metric-big" style="color:#34d399;">22.7d</div>
+                            <div style="font-size:11px; color:#a7f3d0;">Dallas Hub Surplus</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card" style="padding:14px 20px;">
+                        <div style="font-size:13px; font-weight:700; margin-bottom:6px;">🚨 Top Identified Bottlenecks:</div>
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">
+                            • <strong>Doritos 9.25oz in Chicago (`DC-CHI-02`):</strong> 1.7 DOS (-5.3d deficit) | $54,810/day exposure (Surge: +45% Key Account pull)<br>
+                            • <strong>Lay's Classic 8oz in Atlanta (`DC-ATL-03`):</strong> 1.1 DOS (-5.9d deficit) | $49,280/day exposure (Surge: +60% circular feature)<br>
+                            • <strong>Pepsi Cola 12pk in Atlanta (`DC-ATL-03`):</strong> 2.1 DOS (-4.8d deficit) | $34,020/day exposure
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Ranked automatically by SLA Severity Multipliers</span>
+                    <span>Slide 6 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 7: 3-Way Mitigation Simulation -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-7">
+                <div>
+                    <div class="slide-eyebrow">Quantitative Option Modeling</div>
+                    <h2 class="slide-heading">The 3 Mitigation Paths (SOP-SC-042 Step 3)</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-3">
+                        <div class="feature-card" style="border-top:4px solid #38bdf8; position:relative;">
+                            <div class="pill-badge pill-blue" style="margin-bottom:8px;">★ RECOMMENDED</div>
+                            <div class="card-title">Option A: Inter-DC STO</div>
+                            <div class="card-desc" style="font-size:12px;">
+                                Expedited transfer from adjacent surplus donor DC (e.g., Dallas $\to$ Atlanta).
+                            </div>
+                            <div style="margin-top:10px; font-size:12px; line-height:1.7;">
+                                • <strong>Freight:</strong> $4.2k – $18.2k<br>
+                                • <strong>Lead Time:</strong> 16 – 21 hours<br>
+                                • <strong>Post-DOS:</strong> <strong>7.0 Days (Healthy)</strong><br>
+                                • <strong>Fill Rate:</strong> <span style="color:#34d399; font-weight:700;">99.2%</span> (94% Conf.)
+                            </div>
+                        </div>
+
+                        <div class="feature-card" style="border-top:4px solid #fbbf24;">
+                            <div class="pill-badge pill-gold" style="margin-bottom:8px;">ZERO-COST BUFFER</div>
+                            <div class="card-title">Option B: Safety Rebalance</div>
+                            <div class="card-desc" style="font-size:12px;">
+                                Temporarily adjust SAP MARC safety stock parameter from 7.0d to 4.0d.
+                            </div>
+                            <div style="margin-top:10px; font-size:12px; line-height:1.7;">
+                                • <strong>Freight:</strong> $0.00<br>
+                                • <strong>Lead Time:</strong> 1.0 hour (ERP update)<br>
+                                • <strong>Post-DOS:</strong> 1.1 – 3.5 Days<br>
+                                • <strong>Fill Rate:</strong> 88.5% (Vulnerable buffer)
+                            </div>
+                        </div>
+
+                        <div class="feature-card" style="border-top:4px solid #f87171;">
+                            <div class="pill-badge pill-red" style="margin-bottom:8px;">ORDER THROTTLING</div>
+                            <div class="card-title">Option C: Order Deferral</div>
+                            <div class="card-desc" style="font-size:12px;">
+                                Apply 48-hr VBBE delivery block to Tier-2/3 retail orders to preserve Tier-1 OTIF.
+                            </div>
+                            <div style="margin-top:10px; font-size:12px; line-height:1.7;">
+                                • <strong>Freight:</strong> $0.00<br>
+                                • <strong>Lead Time:</strong> 48 hours (Mfg batch)<br>
+                                • <strong>Post-DOS:</strong> 1.9 – 5.8 Days<br>
+                                • <strong>Fill Rate:</strong> 72.0% (Tier 2/3 impacted)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Full financial ROI: $61k total freight protects $894k in immediate wholesale revenue (5.9x return)</span>
+                    <span>Slide 7 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 8: HITL Approval & SAP Posting -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-8">
+                <div>
+                    <div class="slide-eyebrow">Execution & System of Record</div>
+                    <h2 class="slide-heading">HITL Authorization & SAP ERP Posting</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-2">
+                        <div class="feature-card">
+                            <div class="card-title">Live SAP Document Generation</div>
+                            <p class="card-desc">
+                                Upon 1-click planner approval in the UI or CLI, the agent posts authorized execution documents into the enterprise semantic layer:
+                            </p>
+                            <div class="code-snippet" style="margin-top:12px; font-size:11px;">
+                                POST /api/execute<br>
+                                ➔ STO-UB-01: Doc #4500291727<br>
+                                ➔ Qty: 7,527 Cases (SKU-FL-101)<br>
+                                ➔ Route: DC-DAL-01 ➔ DC-ATL-03<br>
+                                ➔ Status: POSTED & VERIFIED
+                            </div>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="card-title">Complete Audit Trail & Governance</div>
+                            <p class="card-desc">
+                                Every action logs timestamp, transaction type, executing planner ID, source/destination plants, and audit rationale:
+                            </p>
+                            <div style="margin-top:10px; font-size:12px; color:var(--text-muted); line-height:1.8;">
+                                ✅ <strong>MARD Stock Realignment:</strong> Automatically adjusts simulated inventory balances.<br>
+                                ✅ <strong>OTIF Protection:</strong> Tier-1 sales requirements locked for priority picking.<br>
+                                ✅ <strong>Enterprise Traceability:</strong> Full historical query via <span class="mono">--show-audit</span>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Governance: No automated ERP write occurs without human planner sign-off</span>
+                    <span>Slide 8 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 9: User Guide (How to Use) -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-9">
+                <div>
+                    <div class="slide-eyebrow">Planner User Guide</div>
+                    <h2 class="slide-heading">How Supply Chain Planners Use the Agent</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-3">
+                        <div class="feature-card">
+                            <div class="card-icon">🌐</div>
+                            <div class="card-title">1. Web Dashboard</div>
+                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
+                                http://localhost:8080
+                            </div>
+                            <p class="card-desc" style="font-size:12px;">
+                                View 06:30 morning triage tables, inspect 3-way mitigation cards, click <strong>"Approve & Post SAP"</strong>, and chat with the AI Copilot.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">💻</div>
+                            <div class="card-title">2. Interactive CLI</div>
+                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
+                                python3 pepsico_sc_agent/main.py --interactive
+                            </div>
+                            <p class="card-desc" style="font-size:12px;">
+                                Step through each exception with interactive terminal prompts ([A] Option A, [B] Option B, [C] Option C, [S] Skip).
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">📄</div>
+                            <div class="card-title">3. Executive Briefing</div>
+                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
+                                python3 pepsico_sc_agent/main.py --generate-brief
+                            </div>
+                            <p class="card-desc" style="font-size:12px;">
+                                Autonomously generates publication-ready Markdown reports (<span class="mono">Daily_Brief_YYYYMMDD.md</span>) for leadership.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>Built for zero-dependency local execution & cloud enterprise deployment</span>
+                    <span>Slide 9 of 10</span>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SLIDE 10: Value Summary & GitHub Access -->
+            <!-- ========================================== -->
+            <div class="slide" id="slide-10">
+                <div style="text-align:center; margin:auto;">
+                    <div class="slide-eyebrow" style="justify-content:center;">Summary & Business Value</div>
+                    <h2 style="font-size:36px; font-weight:900; color:#ffffff; margin-bottom:20px;">
+                        Transforming Supply Chain Triage at PepsiCo
+                    </h2>
+                    
+                    <div class="grid-3" style="max-width:900px; margin:0 auto 28px auto; text-align:left;">
+                        <div class="feature-card">
+                            <div style="font-size:18px; font-weight:800; color:#34d399;">90% Faster</div>
+                            <div class="card-desc" style="font-size:12px;">Reduced morning exception triage from 2.5 hours to under 15 minutes.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div style="font-size:18px; font-weight:800; color:#38bdf8;">99.2% Fill Rate</div>
+                            <div class="card-desc" style="font-size:12px;">Protected Tier-1 Key Account OTIF SLAs against unannounced demand spikes.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div style="font-size:18px; font-weight:800; color:#fbbf24;">5.9x Financial ROI</div>
+                            <div class="card-desc" style="font-size:12px;">$61k in optimized freight transfers protects $894k in immediate wholesale revenue.</div>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:12px 24px; display:inline-block;">
+                        <span style="font-size:13px; color:var(--text-muted);">GitHub Repository:</span>
+                        <a href="https://github.com/ybgoog/PepsiCo-SC-Analyst" target="_blank" style="color:#38bdf8; font-weight:700; text-decoration:none; margin-left:8px;" class="mono">
+                            github.com/ybgoog/PepsiCo-SC-Analyst
+                        </a>
+                    </div>
+                </div>
+                <div class="slide-footer">
+                    <span>PepsiCo Autonomous Supply Chain Agent • Google ADK Suite</span>
+                    <span>Slide 10 of 10</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((el, idx) => {
+                el.classList.toggle('active', idx + 1 === currentSlide);
+            });
+            document.getElementById('slide-num').innerText = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('progress-bar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Keyboard arrow navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -20,6 +20,7 @@ from pepsico_sc_agent.agent.tools import execute_sap_action, simulate_mitigation
 from pepsico_sc_agent.models.schemas import SeverityLevel
 
 HTML_FILE_PATH = os.path.join(os.path.dirname(__file__), "web", "index.html")
+SLIDES_FILE_PATH = os.path.join(os.path.dirname(__file__), "web", "slides.html")
 
 
 class SupplyChainDashboardHandler(BaseHTTPRequestHandler):
@@ -47,6 +48,16 @@ class SupplyChainDashboardHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self._set_headers(500, content_type="text/plain")
                 self.wfile.write(f"Error loading dashboard HTML: {e}".encode("utf-8"))
+
+        elif parsed_path.path in ["/slides", "/slides.html"]:
+            try:
+                with open(SLIDES_FILE_PATH, "r", encoding="utf-8") as f:
+                    content = f.read()
+                self._set_headers(200, content_type="text/html; charset=utf-8")
+                self.wfile.write(content.encode("utf-8"))
+            except Exception as e:
+                self._set_headers(500, content_type="text/plain")
+                self.wfile.write(f"Error loading slides HTML: {e}".encode("utf-8"))
 
         elif parsed_path.path == "/api/triage":
             agent = SupplyChainPlannerAgent()
