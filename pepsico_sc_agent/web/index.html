@@ -532,9 +532,11 @@
         </div>
         <div class="header-actions">
             <a href="/slides" class="btn btn-secondary" style="text-decoration:none;">📽️ View Slides Deck</a>
-            <button class="btn btn-secondary" onclick="resetDatabase()">🔄 Re-seed Data</button>
-            <button class="btn btn-secondary" onclick="fetchTriageData()">⚡ Refresh Triage</button>
-            <button class="btn btn-success" onclick="autoExecuteAll()">✨ Auto-Approve All (HITL)</button>
+            <a href="/api/export-csv" class="btn btn-secondary" style="text-decoration:none;" download="pepsico_sc_triage_master_export.csv">📥 Export Power BI / Excel</a>
+            <button class="btn btn-secondary" onclick="openEmailModal()">✉️ Draft Leadership Email</button>
+            <button class="btn btn-secondary" onclick="resetDatabase()">🔄 Re-seed</button>
+            <button class="btn btn-secondary" onclick="fetchTriageData()">⚡ Refresh</button>
+            <button class="btn btn-success" onclick="autoExecuteAll()">✨ Auto-Approve (HITL)</button>
         </div>
     </header>
 
@@ -682,12 +684,65 @@
 
     </div>
 
+    <!-- Email Modal -->
+    <div id="email-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#111827; border:1px solid var(--border-color); border-radius:12px; width:100%; max-width:750px; max-height:90vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,0.7); overflow:hidden;">
+            <div style="padding:16px 24px; background:#0d1527; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:700; font-size:16px; color:#ffffff; display:flex; align-items:center; gap:8px;">
+                    <span>✉️ Executive Leadership Email Draft</span>
+                    <span class="badge badge-sop">MOP-SC-004 Phase C</span>
+                </div>
+                <button onclick="closeEmailModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:20px 24px; overflow-y:auto; font-size:13px; flex:1;">
+                <div style="background:#080d1a; border:1px solid var(--border-color); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-family:'JetBrains Mono', monospace; font-size:12px; color:#94a3b8;">
+                    <div><strong style="color:#ffffff;">TO:</strong> <span id="email-to">sc-planning-manager@pepsico.com</span></div>
+                    <div><strong style="color:#ffffff;">CC:</strong> <span id="email-cc">ops-lead@pepsico.com, logistics-director@pepsico.com</span></div>
+                    <div><strong style="color:#ffffff;">SUBJECT:</strong> <span id="email-subject" style="color:#38bdf8;">--</span></div>
+                </div>
+                <div id="email-body-text" style="white-space:pre-wrap; font-family:'Inter', sans-serif; line-height:1.7; color:#e2e8f0; background:#162035; border:1px solid var(--border-color); border-radius:8px; padding:16px;">
+                    Loading email draft...
+                </div>
+            </div>
+            <div style="padding:16px 24px; background:#0d1527; border-top:1px solid var(--border-color); display:flex; justify-content:flex-end; gap:12px;">
+                <button class="btn btn-secondary" onclick="closeEmailModal()">Close</button>
+                <button class="btn btn-success" onclick="copyEmailDraft()">📋 Copy Email to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification Container -->
     <div id="toast-container"></div>
 
     <script>
         let currentAlerts = [];
         let currentMatrices = [];
+        let emailDraftText = "";
+
+        async function openEmailModal() {
+            try {
+                const res = await fetch('/api/draft-email');
+                const data = await res.json();
+                document.getElementById('email-to').innerText = data.to;
+                document.getElementById('email-cc').innerText = data.cc;
+                document.getElementById('email-subject').innerText = data.subject;
+                document.getElementById('email-body-text').innerText = data.body;
+                emailDraftText = `TO: ${data.to}\nCC: ${data.cc}\nSUBJECT: ${data.subject}\n\n${data.body}`;
+                document.getElementById('email-modal').style.display = 'flex';
+            } catch (err) {
+                showToast("Failed to generate email draft", "error");
+            }
+        }
+
+        function closeEmailModal() {
+            document.getElementById('email-modal').style.display = 'none';
+        }
+
+        function copyEmailDraft() {
+            navigator.clipboard.writeText(emailDraftText).then(() => {
+                showToast("📋 Executive email draft copied to clipboard!", "success");
+            });
+        }
 
         async function fetchTriageData() {
             try {

@@ -129,26 +129,28 @@ When the planner authorizes mitigation in the Web UI or CLI:
 ```
 <!-- slide -->
 # Slide 9: User Guide — How Planners Use the Agent
-## Interfaces & Interaction Modes
+## Interfaces & Reporting Modes (SOP-SC-042 & MOP-SC-004)
 
-### 1. Interactive Web Dashboard
+### 1. Interactive Operations Hub
 👉 Navigate to: **`http://localhost:8080`**
 - **Morning Triage Tab:** Real-time KPI cards, color-coded table, Days of Supply progress bars.
 - **Mitigation Trade-Offs Tab:** Side-by-side option cards with 1-click **"Approve & Post SAP"** buttons.
 - **SAP Audit Trail Tab:** Live transaction log viewer.
 - **AI Copilot Tab:** Grounded conversational Q&A.
 
-### 2. Interactive Terminal CLI
+### 2. 1-Click Power BI & Excel Data Export
+- Click **"📥 Export Power BI / Excel"** in the top navigation bar (or call `GET /api/export-csv`).
+- Downloads a clean, structured `.csv` master data extract ready for Excel pivot tables, VLOOKUPs, and Power BI models.
+
+### 3. Executive Leadership Email Draft (MOP-SC-004 Phase C)
+- Click **"✉️ Draft Leadership Email"** in the top navigation bar (or call `GET /api/draft-email`).
+- Generates a pre-formatted executive email for the Supply Chain Manager & Operations Lead with 1-click clipboard copy.
+
+### 4. Interactive Terminal CLI
 ```bash
 python3 pepsico_sc_agent/main.py --interactive
 ```
 *Step through each exception with interactive prompts ([A] Option A, [B] Option B, [C] Option C, [S] Skip).*
-
-### 3. Automated Leadership Briefing
-```bash
-python3 pepsico_sc_agent/main.py --generate-brief
-```
-*Generates publication-ready `Daily_Supply_Chain_Exception_Brief_YYYYMMDD.md`.*
 <!-- slide -->
 # Slide 10: Value Summary & Deployment
 ## Business Impact & Codebase Access

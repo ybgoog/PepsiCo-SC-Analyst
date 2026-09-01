@@ -702,45 +702,55 @@
             <!-- ========================================== -->
             <div class="slide" id="slide-9">
                 <div>
-                    <div class="slide-eyebrow">Planner User Guide</div>
+                    <div class="slide-eyebrow">Planner User Guide (SOP-SC-042 & MOP-SC-004)</div>
                     <h2 class="slide-heading">How Supply Chain Planners Use the Agent</h2>
                 </div>
                 <div class="slide-body">
-                    <div class="grid-3">
+                    <div class="grid-4">
                         <div class="feature-card">
                             <div class="card-icon">🌐</div>
-                            <div class="card-title">1. Web Dashboard</div>
-                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
+                            <div class="card-title">1. Operations Hub</div>
+                            <div class="code-snippet" style="font-size:10px; margin-bottom:8px;">
                                 http://localhost:8080
                             </div>
-                            <p class="card-desc" style="font-size:12px;">
-                                View 06:30 morning triage tables, inspect 3-way mitigation cards, click <strong>"Approve & Post SAP"</strong>, and chat with the AI Copilot.
+                            <p class="card-desc" style="font-size:11px;">
+                                06:30 morning triage tables, 3-way mitigation cards, 1-click <strong>"Approve & Post SAP"</strong>, and live audit tracking.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">2. Power BI / Excel</div>
+                            <div class="code-snippet" style="font-size:10px; margin-bottom:8px;">
+                                GET /api/export-csv
+                            </div>
+                            <p class="card-desc" style="font-size:11px;">
+                                1-click tabular export (<span class="mono">.csv</span>) formatted for pivot tables, VLOOKUPs, and Power BI models.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="card-icon">✉️</div>
+                            <div class="card-title">3. Leadership Email</div>
+                            <div class="code-snippet" style="font-size:10px; margin-bottom:8px;">
+                                GET /api/draft-email
+                            </div>
+                            <p class="card-desc" style="font-size:11px;">
+                                Pre-formatted MOP-SC-004 executive email draft for SC Planning Manager & Ops Lead with 1-click clipboard copy.
                             </p>
                         </div>
                         <div class="feature-card">
                             <div class="card-icon">💻</div>
-                            <div class="card-title">2. Interactive CLI</div>
-                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
-                                python3 pepsico_sc_agent/main.py --interactive
+                            <div class="card-title">4. Interactive CLI</div>
+                            <div class="code-snippet" style="font-size:10px; margin-bottom:8px;">
+                                python3 ... --interactive
                             </div>
-                            <p class="card-desc" style="font-size:12px;">
-                                Step through each exception with interactive terminal prompts ([A] Option A, [B] Option B, [C] Option C, [S] Skip).
-                            </p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="card-icon">📄</div>
-                            <div class="card-title">3. Executive Briefing</div>
-                            <div class="code-snippet" style="font-size:11px; margin-bottom:8px;">
-                                python3 pepsico_sc_agent/main.py --generate-brief
-                            </div>
-                            <p class="card-desc" style="font-size:12px;">
-                                Autonomously generates publication-ready Markdown reports (<span class="mono">Daily_Brief_YYYYMMDD.md</span>) for leadership.
+                            <p class="card-desc" style="font-size:11px;">
+                                Terminal step-through with interactive prompts ([A] STO, [B] Rebalance, [C] Deferral, [S] Skip).
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="slide-footer">
-                    <span>Built for zero-dependency local execution & cloud enterprise deployment</span>
+                    <span>Complete Reporting & Sign-Off Automation under SOP-SC-042 & MOP-SC-004</span>
                     <span>Slide 9 of 10</span>
                 </div>
             </div>
