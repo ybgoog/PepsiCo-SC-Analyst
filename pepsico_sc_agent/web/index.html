@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PepsiCo Supply Chain Agent | ADK Operations Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pepsi-navy: #001e44;
+            --pepsi-blue: #005cb9;
+            --pepsi-light-blue: #0085ca;
+            --pepsi-red: #e32219;
+            --pepsi-gold: #f4b223;
+            --pepsi-emerald: #00875a;
+            --bg-dark: #0a0f1d;
+            --bg-card: #111827;
+            --bg-card-hover: #1b2438;
+            --border-color: #24324d;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dim: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        /* Top Navbar */
+        header {
+            background: linear-gradient(135deg, var(--pepsi-navy) 0%, #00122b 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo {
+            background: linear-gradient(135deg, var(--pepsi-blue) 0%, var(--pepsi-red) 100%);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 92, 185, 0.5);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-sop { background: rgba(0, 133, 202, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-mop { background: rgba(244, 178, 35, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+        .badge-critical { background: rgba(227, 34, 25, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-warning { background: rgba(244, 178, 35, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-healthy { background: rgba(0, 135, 90, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--pepsi-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #0070e0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 92, 185, 0.4);
+        }
+
+        .btn-secondary {
+            background: #1f293d;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #2a3752;
+        }
+
+        .btn-danger {
+            background: var(--pepsi-red);
+        }
+
+        .btn-danger:hover {
+            background: #c51b13;
+        }
+
+        .btn-success {
+            background: var(--pepsi-emerald);
+        }
+
+        .btn-success:hover {
+            background: #00a36d;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
+
+        /* Top KPI Bar */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--pepsi-blue);
+        }
+
+        .kpi-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: #38bdf8;
+            border-bottom-color: #38bdf8;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Card Section */
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th {
+            background: #0e1422;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Progress Bar for DOS */
+        .dos-bar-container {
+            width: 100%;
+            max-width: 100px;
+            background: #24324d;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .dos-bar {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .dos-bar.critical { background: var(--pepsi-red); }
+        .dos-bar.warning { background: var(--pepsi-gold); }
+        .dos-bar.healthy { background: var(--pepsi-emerald); }
+
+        /* Mitigation Matrix Grid */
+        .mitigation-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .mitigation-card {
+            background: #0e1424;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .mitigation-card.recommended {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .rec-tag {
+            position: absolute;
+            top: -10px;
+            right: 16px;
+            background: linear-gradient(135deg, var(--pepsi-blue), #38bdf8);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mitigation-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .opt-badge {
+            background: #1e293b;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+
+        .opt-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .opt-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+            margin-bottom: 16px;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+        }
+
+        .metric-val {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: #111827;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--pepsi-emerald);
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-size: 13px;
+            color: white;
+            min-width: 320px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Chat Assistant Pane */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background: #0d1322;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .chat-bubble.agent {
+            align-self: flex-start;
+            background: #162035;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: var(--pepsi-blue);
+            color: white;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: #111827;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #0a0f1d;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">P</div>
+            <div class="brand-text">
+                <h1>PepsiCo Autonomous Supply Chain Agent</h1>
+                <p>
+                    <span class="badge badge-sop">SOP-SC-042</span>
+                    <span class="badge badge-mop">MOP-SC-042</span>
+                    <span>CPG Operations & Logistics Engine</span>
+                </p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="resetDatabase()">🔄 Re-seed Data</button>
+            <button class="btn btn-secondary" onclick="fetchTriageData()">⚡ Refresh Triage</button>
+            <button class="btn btn-success" onclick="autoExecuteAll()">✨ Auto-Approve All (HITL)</button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Active Portfolio Exceptions</div>
+                <div class="kpi-value" id="kpi-exceptions">--</div>
+                <div class="kpi-sub">
+                    <span class="badge badge-critical" id="kpi-critical">-- Critical</span>
+                    <span class="badge badge-warning" id="kpi-warning">-- Warning</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Cumulative Revenue Exposure</div>
+                <div class="kpi-value" id="kpi-revenue">$--</div>
+                <div class="kpi-sub">Daily Wholesale Impact</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Rebalance Cases Needed</div>
+                <div class="kpi-value" id="kpi-cases">--</div>
+                <div class="kpi-sub">To Restore Target DOS $\ge 7.0$</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Projected Protected Fill Rate</div>
+                <div class="kpi-value" style="color: #34d399;">99.2%</div>
+                <div class="kpi-sub">Tier-1 OTIF Protected</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-triage')">📊 Morning Triage (06:30)</button>
+            <button class="tab-btn" onclick="switchTab('tab-mitigations')">⚖️ Mitigation Trade-Offs (07:00)</button>
+            <button class="tab-btn" onclick="switchTab('tab-audit')">📜 SAP ERP Audit Trail (07:30 - 08:00)</button>
+            <button class="tab-btn" onclick="switchTab('tab-copilot')">💬 AI Planner Copilot</button>
+        </div>
+
+        <!-- Tab 1: Morning Exception Triage -->
+        <div id="tab-triage" class="tab-pane active">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>🚨 Prioritized Exception Ranking</span>
+                        <span class="badge badge-sop">SOP-SC-042 Step 2</span>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted);">Ranked by Daily Revenue at Risk $\times$ Customer SLA Severity</span>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Severity</th>
+                                <th>SKU ID</th>
+                                <th>Product Description</th>
+                                <th>Distribution Center</th>
+                                <th>On-Hand</th>
+                                <th>Daily Demand</th>
+                                <th>Days of Supply</th>
+                                <th>Deficit</th>
+                                <th>Daily Rev Exposure</th>
+                                <th>Risk Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="triage-table-body">
+                            <tr><td colspan="12" style="text-align:center; color:var(--text-muted);">Loading morning exception brief...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title" style="margin-bottom: 12px;">📝 Executive Commentary & Root Cause Analysis</div>
+                <div id="executive-commentary" style="font-size: 13px; line-height: 1.7; color: #d1d5db;">
+                    Loading executive diagnosis...
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Mitigation Trade-Off Matrix -->
+        <div id="tab-mitigations" class="tab-pane">
+            <div id="mitigations-container">
+                <!-- Dynamically injected exception cards and 3-way option grids -->
+            </div>
+        </div>
+
+        <!-- Tab 3: SAP Audit Trail -->
+        <div id="tab-audit" class="tab-pane">
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span>📋 Live SAP ERP / IBP Transaction Audit Trail</span>
+                        <span class="badge badge-mop">MOP-SC-042 Step 4</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="fetchAuditTrail()">🔄 Refresh Logs</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SAP Document #</th>
+                                <th>Transaction Code</th>
+                                <th>SKU ID</th>
+                                <th>Source Plant</th>
+                                <th>Destination Plant</th>
+                                <th>Quantity (Cases)</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                                <th>Audit Log / Authorization</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-table-body">
+                            <tr><td colspan="9" style="text-align:center; color:var(--text-muted);">No SAP documents posted yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: AI Planner Copilot -->
+        <div id="tab-copilot" class="tab-pane">
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-box">
+                    <div class="chat-bubble agent">
+                        <strong>PepsiCo SC Copilot:</strong><br>
+                        Hello! I am your Autonomous Demand & Inventory Planner Assistant. 
+                        I've triaged this morning's regional exceptions across Dallas, Chicago, Atlanta, and Northeast hubs. 
+                        You can ask me questions like:
+                        <br><br>
+                        • <em>"Why is Doritos at critical risk in Chicago?"</em><br>
+                        • <em>"What is the linehaul freight cost from Dallas to Atlanta?"</em><br>
+                        • <em>"Compare Option A vs Option B for Lay's Classic."</em>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Ask your supply chain copilot a question or propose a mitigation scenario..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                    <button class="btn" onclick="sendChatMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        let currentAlerts = [];
+        let currentMatrices = [];
+
+        async function fetchTriageData() {
+            try {
+                const res = await fetch('/api/triage');
+                const data = await res.json();
+                currentAlerts = data.alerts;
+                currentMatrices = data.matrices;
+
+                // Update KPIs
+                document.getElementById('kpi-exceptions').innerText = data.alerts.length;
+                document.getElementById('kpi-critical').innerText = `${data.critical_count} Critical`;
+                document.getElementById('kpi-warning').innerText = `${data.warning_count} Warning`;
+                document.getElementById('kpi-revenue').innerText = `$${data.total_revenue_at_risk.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('kpi-cases').innerText = `${data.total_units_needed.toLocaleString()} Cases`;
+
+                // Render Commentary
+                document.getElementById('executive-commentary').innerHTML = data.commentary.replace(/\n\n/g, '<br><br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                // Render Table
+                renderTriageTable(data.alerts);
+                renderMitigations(data.alerts, data.matrices);
+                fetchAuditTrail();
+            } catch (err) {
+                console.error("Failed to load triage data:", err);
+                showToast("Failed to fetch morning triage data", "error");
+            }
+        }
+
+        function renderTriageTable(alerts) {
+            const tbody = document.getElementById('triage-table-body');
+            if (!alerts || alerts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:#34d399;">✅ All SKU inventory positions healthy (DOS >= 7.0).</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = alerts.map((a, idx) => {
+                const sevBadge = a.severity === 'CRITICAL' ? '<span class="badge badge-critical">CRITICAL</span>' : '<span class="badge badge-warning">WARNING</span>';
+                const barClass = a.severity === 'CRITICAL' ? 'critical' : 'warning';
+                const barPct = Math.min(100, (a.current_dos / a.safety_stock_dos_threshold) * 100);
+
+                return `
+                    <tr>
+                        <td class="mono"><strong>${idx + 1}</strong></td>
+                        <td>${sevBadge}</td>
+                        <td class="mono"><strong>${a.sku_id}</strong></td>
+                        <td><strong>${a.sku_name}</strong></td>
+                        <td>${a.dc_name} <span class="mono" style="color:var(--text-dim);">(${a.dc_id})</span></td>
+                        <td class="mono">${a.current_on_hand.toLocaleString()}</td>
+                        <td class="mono">${Math.round(a.daily_demand_rate).toLocaleString()}/day</td>
+                        <td>
+                            <span class="mono"><strong>${a.current_dos.toFixed(1)}d</strong> / ${a.safety_stock_dos_threshold.toFixed(1)}d</span>
+                            <div class="dos-bar-container"><div class="dos-bar ${barClass}" style="width: ${barPct}%;"></div></div>
+                        </td>
+                        <td class="mono" style="color:#f87171;">-${a.dos_deficit_days.toFixed(1)}d</td>
+                        <td class="mono" style="font-weight:700; color:#38bdf8;">$${a.daily_revenue_at_risk.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="mono"><code>${a.sla_weighted_risk_score.toFixed(1)}</code></td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" onclick="viewMitigationForSku('${a.sku_id}', '${a.dc_id}')">View Options</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderMitigations(alerts, matrices) {
+            const container = document.getElementById('mitigations-container');
+            if (!matrices || matrices.length === 0) {
+                container.innerHTML = '<div class="section-card">No critical exceptions requiring mitigation.</div>';
+                return;
+            }
+
+            container.innerHTML = matrices.map((m, idx) => {
+                const alert = alerts.find(a => a.sku_id === m.sku_id && a.dc_id === m.dc_id) || {};
+                return `
+                    <div class="section-card" id="card-${m.dc_id}-${m.sku_id}">
+                        <div class="section-header">
+                            <div>
+                                <h3 style="font-size:16px; font-weight:700;">Exception #${idx+1}: ${alert.sku_name || m.sku_id}</h3>
+                                <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                                    Location: <strong>${alert.dc_name || m.dc_id}</strong> | Current DOS: <strong style="color:#f87171;">${alert.current_dos ? alert.current_dos.toFixed(1) : '--'}d</strong> | Daily Exposure: <strong>$${alert.daily_revenue_at_risk ? alert.daily_revenue_at_risk.toLocaleString() : '--'}</strong>
+                                </p>
+                            </div>
+                            <span class="badge badge-sop">SOP-SC-042 Step 3</span>
+                        </div>
+                        <div style="background:#162035; border-left:3px solid #38bdf8; padding:10px 16px; border-radius:6px; font-size:12px; margin-bottom:20px;">
+                            <strong>Agent Recommendation Rationale:</strong> ${m.recommendation_rationale}
+                        </div>
+                        <div class="mitigation-card-grid">
+                            ${m.options.map(opt => {
+                                const isRec = opt.option_id === m.recommended_option_id;
+                                return `
+                                    <div class="mitigation-card ${isRec ? 'recommended' : ''}">
+                                        ${isRec ? '<div class="rec-tag">★ Recommended</div>' : ''}
+                                        <div>
+                                            <div class="mitigation-header">
+                                                <span class="opt-badge">${opt.option_type}</span>
+                                                <span class="opt-title">${opt.title}</span>
+                                            </div>
+                                            <p class="opt-desc">${opt.description}</p>
+                                            
+                                            <div class="metric-row">
+                                                <span class="metric-label">Execution Freight Cost</span>
+                                                <span class="metric-val" style="color:${opt.execution_cost_usd > 0 ? '#fbbf24' : '#34d399'};">$${opt.execution_cost_usd.toLocaleString(undefined, {minimumFractionDigits:2})}</span>
+                                            </div>
+                                            <div class="metric-row">
+                                                <span class="metric-label">Recovery Lead Time</span>
+                                                <span class="metric-val">${opt.recovery_lead_time_hours.toFixed(1)} hrs</span>
+                                            </div>
+                                            <div class="metric-row">
+                                                <span class="metric-label">Post-Mitigation DOS</span>
+                                                <span class="metric-val" style="color:#38bdf8;">${opt.post_mitigation_dos.toFixed(1)} Days</span>
+                                            </div>
+                                            <div class="metric-row">
+                                                <span class="metric-label">Protected Revenue</span>
+                                                <span class="metric-val" style="color:#34d399;">$${opt.protected_revenue_usd.toLocaleString(undefined, {minimumFractionDigits:2})}</span>
+                                            </div>
+                                            <div class="metric-row">
+                                                <span class="metric-label">Model Confidence</span>
+                                                <span class="metric-val">${Math.round(opt.risk_confidence_score * 100)}%</span>
+                                            </div>
+                                        </div>
+                                        <button class="btn ${isRec ? 'btn-success' : 'btn-secondary'}" style="width:100%; margin-top:16px; justify-content:center;" onclick="executeSapOption('${m.sku_id}', '${m.dc_id}', '${opt.option_id}')">
+                                            ✓ Approve & Post SAP (${opt.sap_transaction_code})
+                                        </button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function executeSapOption(skuId, dcId, optionId) {
+            try {
+                const res = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sku_id: skuId, dc_id: dcId, option_id: optionId})
+                });
+                const data = await res.json();
+                if (data.status === 'SUCCESS') {
+                    showToast(`✅ SAP Document #${data.sap_document_number} Posted (${data.transaction_code}) for ${skuId}!`, 'success');
+                    fetchTriageData();
+                } else {
+                    showToast(`Error: ${data.message || 'Execution failed'}`, 'error');
+                }
+            } catch (err) {
+                showToast("Failed to execute SAP transaction", "error");
+            }
+        }
+
+        async function autoExecuteAll() {
+            try {
+                const res = await fetch('/api/auto-execute-all', { method: 'POST' });
+                const data = await res.json();
+                showToast(`🚀 Auto-approved ${data.executed_count} recommended mitigations in SAP!`, 'success');
+                fetchTriageData();
+            } catch (err) {
+                showToast("Auto-execution failed", "error");
+            }
+        }
+
+        async function resetDatabase() {
+            try {
+                await fetch('/api/reset', { method: 'POST' });
+                showToast("🔄 Database re-seeded with fresh PepsiCo scenario data.", "success");
+                fetchTriageData();
+            } catch (err) {
+                showToast("Failed to re-seed data", "error");
+            }
+        }
+
+        async function fetchAuditTrail() {
+            try {
+                const res = await fetch('/api/audit');
+                const logs = await res.json();
+                const tbody = document.getElementById('audit-table-body');
+                if (!logs || logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">No SAP documents posted yet.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td class="mono"><strong>#${l.sap_doc_number}</strong></td>
+                        <td class="mono"><span class="badge badge-sop">${l.transaction_code}</span></td>
+                        <td class="mono">${l.sku_id}</td>
+                        <td class="mono">${l.source_plant || 'N/A'}</td>
+                        <td class="mono">${l.destination_plant}</td>
+                        <td class="mono">${l.quantity_cases.toLocaleString()}</td>
+                        <td><span class="badge badge-healthy">${l.execution_status}</span></td>
+                        <td class="mono" style="font-size:11px;">${l.timestamp}</td>
+                        <td style="font-size:12px;">${l.audit_message}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Audit log fetch error:", err);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function viewMitigationForSku(skuId, dcId) {
+            switchTab('tab-mitigations');
+            const target = document.getElementById(`card-${dcId}-${skuId}`);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="chat-bubble user"><strong>You:</strong><br>${msg}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+                const data = await res.json();
+                chatBox.innerHTML += `<div class="chat-bubble agent"><strong>PepsiCo SC Copilot:</strong><br>${data.reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                chatBox.innerHTML += `<div class="chat-bubble agent" style="color:#f87171;">Failed to connect to agent backend.</div>`;
+            }
+        }
+
+        // Initialize on load
+        fetchTriageData();
+    </script>
+</body>
+</html>
